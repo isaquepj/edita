@@ -13821,6 +13821,46 @@ if (document.readyState === 'loading') {
     // DOM já carregado, executar com delay para garantir que elementos estejam disponíveis
     setTimeout(adjustShareButtonPosition, 500);
 }
+    // ===== ENVIAR PEDIDO PARA A PLANILHA (AINDA DESLIGADO) =====
+const PEDIDOS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx5nFXE-eKmqVmJMyoWV7eZ662SxQ3MXBQ9K-DYp4Iu53plvQgzXbPnmJqNyhlVkN_c0Q/exec';
+
+async function sendOrderToSheetSimple() {
+  try {
+    // Se existir objeto global orderData, usamos ele;
+    // senão, não fazemos nada (para não quebrar o código)
+    if (typeof orderData === 'undefined') {
+      console.warn('orderData não existe, não vou enviar nada para a planilha');
+      return;
+    }
+
+    const payload = {
+      cliente: orderData.customerName || '',
+      whatsapp: orderData.whatsapp || '',
+      itens: (typeof generateOrderSummaryText === 'function'
+              ? generateOrderSummaryText()
+              : JSON.stringify(orderData.cart || [])),
+      total: (typeof calculateFinalOrderTotal === 'function'
+              ? calculateFinalOrderTotal()
+              : orderData.total || 0),
+      forma_pagamento: orderData.paymentMethod || '',
+      tipo_pedido: orderData.deliveryType || 'balcao'
+    };
+
+    // Dispara o POST mas não trava o resto se der erro
+    fetch(PEDIDOS_WEBAPP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(e => {
+      console.error('Erro no fetch para planilha (ignorando):', e);
+    });
+
+  } catch (e) {
+    console.error('Erro geral ao montar envio para planilha (ignorando):', e);
+  }
+}
+
 </script>
 
 
