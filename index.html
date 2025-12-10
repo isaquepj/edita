@@ -9605,7 +9605,8 @@
                 showFieldError('customer-name', customerName ? 'Nome deve ter pelo menos 2 caracteres' : 'Nome completo é obrigatório');
                 hasErrors = true;
             }
-            
+            // Registrar pedido na planilha (novo)
+sendOrderToSheetSimple();
             // Validate WhatsApp if webhook is active
             if (isWebhookActive()) {
                 const countryCodeSelect = document.getElementById('country-code');
